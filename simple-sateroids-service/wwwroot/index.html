@@ -1,0 +1,133 @@
+<html>
+	<head>
+		<script src='js/asteroid.js'></script>
+		<script src='js/player.js'></script>
+		<script src='js/bullet.js'></script>
+		<script src='js/ui.js'></script>
+	</head>
+	<body>
+		<canvas id="canvas" width="640px" height="480px">Get a real browser already will ya?</canvas>
+	</body>
+	<script>
+			
+		// Spawn
+		var ctx = document.getElementById('canvas').getContext("2d");
+		var rocks = [];
+		var bullets = [];
+		var pl = new player(400, 400, 270);
+		var score = 0;
+		var rockSeed = 1;
+		
+		function spawn(num) {
+			for (var i = 0; i < num; i++)
+				rocks.push(new asteroid(Math.random() * ctx.canvas.width, Math.random() * ctx.canvas.height, 10, 30, Math.random() * 360, true));
+		}
+		
+		spawn(rockSeed);
+				
+		(function render() {
+			drawLoop(ctx);
+			requestAnimationFrame(render);
+		})();
+		
+		// draw loop
+		function drawLoop(ctx) {
+			ctx.fillStyle = '#000000';
+			ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+			ctx.fillStyle = '#FFFFFF';
+
+			if (pl.dead)
+				drawText(ctx, "YOU DIED\r\nYour score is: " + score + "\r\n Press ESC to play again");			
+			else {								
+				ctx.fillText('Score: ' + score,  ctx.canvas.width - 100, 30);
+				pl.draw(ctx);
+				for (var i = 0; i < rocks.length; i++)
+					rocks[i].draw(ctx);			
+				for (var j = 0; j < bullets.length; j++)
+					bullets[j].draw(ctx);
+			}
+		};
+		
+		var acc = false;
+		var r = false;
+		var l = false;
+		var shot = false;		
+		
+		// logic loop
+		setInterval(function() {	
+			pl.move();
+			
+			if (acc)
+				pl.accelerate();
+			if (r)
+				pl.rotate(0);
+			if (l)
+				pl.rotate(1);
+			// if (shoot)
+			// 	bullets.push(pl.getBullet());						
+			
+			for (var i = 0; i < rocks.length; i++) 
+			{
+				if (rocks[i].contains(pl.getCoords()))
+					pl.dead = true;
+				for(var k = 0; k < bullets.length; k++)
+				{
+					if (rocks[i].contains(bullets[k].getCoords())) {						
+						var newRocks = rocks[i].split()
+						for (var z = 0; z < newRocks.length; z++)
+							rocks.push(newRocks[z]);
+						rocks.splice(i, 1);
+						rocks.push();
+						bullets.splice(k, 1);
+						score++;
+					}
+				}
+				rocks[i].move();
+			}
+			for (var j = 0; j < bullets.length; j++) {
+				bullets[j].move();
+				if (bullets[j].isOld())
+					bullets.splice(j, 1);
+			}
+			if (rocks.length == 0)
+				spawn(++rockSeed);
+		}, 60);
+		
+		window.onkeydown = function(e) {
+			switch(e.keyCode) {
+				case 38:
+					acc = true;
+					break;
+				case 39: //right
+					r = true;
+					break;
+				case 37: //right
+					l = true;
+					break;
+				case 17: //ctrl											
+					if (!shot) bullets.push(pl.getBullet());
+					shot = true;
+					break;
+				case 27: // esc
+					location.reload();
+			}			
+		}
+		
+		window.onkeyup = function(e) {
+			switch(e.keyCode) {
+				case 38:
+					acc = false;
+					break;
+				case 39: //right
+					r = false;
+					break;
+				case 37: //right
+					l = false;
+					break;
+				case 17: // ctrl
+					shot = false;
+					break;
+			}			
+		}
+	</script>
+</html>
