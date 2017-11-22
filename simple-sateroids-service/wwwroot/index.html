@@ -123,8 +123,10 @@
 					gameStarted = true;
 				break;
 				case 13: // enter
-					if (pl.dead && name.length > 0)
+					if (pl.dead && name.length > 0) {
 						AddScore(name, score);
+						location.reload();
+					}
 				break;
 				case 8: // backspace
 					name = name.substr(0, name.length - 1);
