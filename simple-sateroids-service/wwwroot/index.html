@@ -3,7 +3,9 @@
 		<script src='js/asteroid.js'></script>
 		<script src='js/player.js'></script>
 		<script src='js/bullet.js'></script>
-		<script src='js/ui.js'></script>
+		<script src='js/ui.js'></script>		
+		<script src='js/api.js'></script>	
+		<script src='https://code.jquery.com/jquery-3.2.1.min.js'></script>
 	</head>
 	<body>
 		<canvas id="canvas" width="640px" height="480px">Get a real browser already will ya?</canvas>
@@ -17,12 +19,16 @@
 		var pl = new player(400, 400, 270);
 		var score = 0;
 		var rockSeed = 1;
+		var gameStarted = false;
+		var name = "";
 		
 		function spawn(num) {
 			for (var i = 0; i < num; i++)
 				rocks.push(new asteroid(Math.random() * ctx.canvas.width, Math.random() * ctx.canvas.height, 10, 30, Math.random() * 360, true));
 		}
 		
+		var leaderboard = GetLeaderboard();
+
 		spawn(rockSeed);
 				
 		(function render() {
@@ -36,15 +42,20 @@
 			ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 			ctx.fillStyle = '#FFFFFF';
 
-			if (pl.dead)
-				drawText(ctx, "YOU DIED\r\nYour score is: " + score + "\r\n Press ESC to play again");			
-			else {								
-				ctx.fillText('Score: ' + score,  ctx.canvas.width - 100, 30);
-				pl.draw(ctx);
-				for (var i = 0; i < rocks.length; i++)
-					rocks[i].draw(ctx);			
-				for (var j = 0; j < bullets.length; j++)
-					bullets[j].draw(ctx);
+			if (!gameStarted) {
+				showLeaderboard(ctx, leaderboard)
+			}
+			else {
+				if (pl.dead)
+					showGameOver(ctx, score, name);			
+				else {								
+					drawScore(ctx, score);
+					pl.draw(ctx);
+					for (var i = 0; i < rocks.length; i++)
+						rocks[i].draw(ctx);			
+					for (var j = 0; j < bullets.length; j++)
+						bullets[j].draw(ctx);
+				}
 			}
 		};
 		
@@ -62,9 +73,7 @@
 			if (r)
 				pl.rotate(0);
 			if (l)
-				pl.rotate(1);
-			// if (shoot)
-			// 	bullets.push(pl.getBullet());						
+				pl.rotate(1);								
 			
 			for (var i = 0; i < rocks.length; i++) 
 			{
@@ -110,6 +119,20 @@
 					break;
 				case 27: // esc
 					location.reload();
+				case 32: // space
+					gameStarted = true;
+				break;
+				case 13: // enter
+					if (pl.dead && name.length > 0)
+						AddScore(name, score);
+				break;
+				case 8: // backspace
+					name = name.substr(0, name.length - 1);
+				break;
+				default: 
+					if (pl.dead && name.length < 13)
+						name += e.key;
+				break;
 			}			
 		}
 		
