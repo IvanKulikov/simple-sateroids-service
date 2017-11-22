@@ -1,7 +1,7 @@
 function GetLeaderboard() {
     var ret = {};
     $.ajax({
-        url: 'http://localhost:5000/Score/GetLeaderboard',        
+        url: 'http://192.168.128.42:5000/Score/GetLeaderboard',        
         type: 'GET',
         async: false,
         success: function(data) {
@@ -13,7 +13,7 @@ function GetLeaderboard() {
 
 function AddScore(name, score) {
     $.ajax({
-        url: 'http://localhost:5000/Score/AddScore',        
+        url: 'http://192.168.128.42:5000/Score/AddScore',        
         type: 'POST',
         data:{
             name: name,
